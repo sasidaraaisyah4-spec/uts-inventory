@@ -1,4 +1,4 @@
-# 🧸 Pop Mart & Art Toys Inventory & Sales Management System
+#  Pop Mart & Art Toys Inventory & Sales Management System
 
 [![Laravel](https://img.shields.io/badge/Laravel-8.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
@@ -10,7 +10,7 @@ Aplikasi web inventaris dan kasir modern berbasis **Laravel** yang dirancang unt
 
 ---
 
-## 📑 Daftar Isi
+##  Daftar Isi
 - [Latar Belakang & Fitur Utama](#-fitur-utama)
 - [Hak Akses Pengguna (Role Matrix)](#-hak-akses-pengguna-role-matrix)
 - [Diagram Relasi Entitas (ERD) & Basis Data](#️-diagram-relasi-entitas-erd--basis-data)
@@ -23,40 +23,40 @@ Aplikasi web inventaris dan kasir modern berbasis **Laravel** yang dirancang unt
 
 ---
 
-## ✨ Fitur Utama
+##  Fitur Utama
 
-### 1. 📊 Interactive Dashboard & KPI Metrics
+### 1.Interactive Dashboard & KPI Metrics
 - **Metrik Real-time**: Total omzet penjualan, jumlah pesanan, total varian katalog, dan total mitra supplier.
 - **Alert Stok Menipis (Low Stock Alert)**: Notifikasi dini ketika stok produk mencapai atau berada di bawah ambang batas minimum (`stock <= minimum_stock`).
 - **Analitik Kategori Populer**: Peringkat kategori terlaris (*Blind Box*, *Action Figure*, *Plushie*, *Accessories*) yang dikalkulasi secara dinamis dari transaksi aktif.
 - **Tampilan Khusus Customer**: Riwayat pesanan pribadi, status transaksi, serta akumulasi total belanjaan langsung dari dashboard.
 
-### 2. 📦 Manajemen Master Data & Katalog (Admin Only)
+### 2.Manajemen Master Data & Katalog (Admin Only)
 - **Katalog Produk Terpadu**: Manajemen SKU unik, nama barang, gambar pratinjau, harga beli (*purchase price*), harga jual (*selling price*), stok terkini, dan batas *minimum stock*.
 - **Kategori & Supplier**: CRUD kategori dan direktori pemasok lengkap dengan validasi integritas *foreign key* (mencegah penghapusan kategori/supplier yang masih memiliki relasi data).
 - **Pencarian Cepat**: Filter katalog produk berdasarkan nama, kode SKU, maupun kategori.
 
-### 3. 📥 Restock & Pembelian Pemasok (*Purchases*)
+### 3.Restock & Pembelian Pemasok (*Purchases*)
 - Pengadaan barang masuk dari supplier dengan penomoran dokumen otomatis.
 - Pencatatan harga modal satuan dan total biaya transaksi.
 - Otomasi penambahan kuantitas stok produk seketika transaksi pembelian berhasil disimpan.
 
-### 4. 💳 Sistem Kasir & Self Checkout (*Sales*)
+### 4.Sistem Kasir & Self Checkout (*Sales*)
 - **Staff / Admin POS**: Kasir dapat memproses transaksi penjualan langsung di toko fisik dengan pemotongan stok otomatis.
 - **Customer Self Checkout**: Pelanggan dapat memilih produk melalui etalase, menentukan jumlah unit, dan melakukan pemesanan langsung dari portal akun mereka dengan metode pembayaran Tunai (Cash).
 - **Safety Lock & Race-Condition Safe**: Menggunakan `DB::transaction` dan `lockForUpdate()` untuk mencegah *overselling* (pembelian melebihi sisa stok riil).
 
-### 5. 🔍 Filter & Pencarian Cepat Multi-Level
+### 5.Filter & Pencarian Cepat Multi-Level
 - Dilengkapi kolom input pencarian interaktif berikon kaca pembesar (*search icon*) di katalog belanja customer, riwayat pesanan, tabel transaksi kasir, maupun tabel inventaris produk admin & staff.
 - Filter cepat berdasarkan kategori produk, status stok (Aman / Kritis / Habis), serta rentang tanggal transaksi.
 
-### 6. 🧾 Cetak Nota Transaksi (*Invoice Generator*)
+### 6.Cetak Nota Transaksi (*Invoice Generator*)
 - Halaman struk/nota digital dengan format bersih, siap cetak (*print-ready*).
 - Perlindungan privasi: Pelanggan hanya dapat melihat faktur/nota miliknya sendiri (`403 Forbidden` jika mengakses invoice pengguna lain).
 
 ---
 
-## 👥 Hak Akses Pengguna (Role Matrix)
+## Hak Akses Pengguna (Role Matrix)
 
 Sistem menerapkan pengamanan berbasis peran (*Role-Based Access Control*) melalui middleware:
 
@@ -73,79 +73,13 @@ Sistem menerapkan pengamanan berbasis peran (*Role-Based Access Control*) melalu
 
 ---
 
-## 🗄️ Diagram Relasi Entitas (ERD) & Basis Data
+## Diagram Relasi Entitas (ERD) & Basis Data
 
 Aplikasi menggunakan basis data relasional MySQL dengan integritas relasi yang ketat dan menerapkan kaidah normalisasi database:
 
 ### 1. Entity Relationship Diagram (ERD)
 
-```text
-+-----------------------+              1:N             +-----------------------+
-|      CATEGORIES       |-----------------------------<|       PRODUCTS        |
-+-----------------------+                              +-----------------------+
-| PK  id                |                              | PK  id                |
-|     name (UNIQUE)     |                              | FK  category_id       |
-|     created_at        |                              |     sku (UNIQUE)      |
-|     updated_at        |                              |     name              |
-+-----------------------+                              |     image             |
-                                                       |     purchase_price    |
-                                                       |     selling_price     |
-+-----------------------+                              |     stock             |
-|       SUPPLIERS       |                              |     minimum_stock     |
-+-----------------------+                              |     created_at        |
-| PK  id                |                              |     updated_at        |
-|     name              |                              +-----------------------+
-|     phone             |                                       |           ^
-|     email             |                                   1:N |           | 1:N
-|     created_at        |                                       v           |
-|     updated_at        |                             +------------------+  |
-+-----------------------+                             |  PURCHASE_ITEMS  |  |
-           |                                          +------------------+  |
-           | 1:N                                      | PK id            |  |
-           v                                          | FK purchase_id   |  |
-+-----------------------+      1:N                    | FK product_id    |--+
-|       PURCHASES       |----------------------------<|    quantity      |
-+-----------------------+                             |    unit_cost     |
-| PK  id                |                             |    subtotal      |
-| FK  supplier_id       |                             |    created_at    |
-| FK  user_id           |                             |    updated_at    |
-|     purchase_number   |                             +------------------+
-|     total             |
-|     status            |
-|     purchased_at      |
-|     created_at        |
-|     updated_at        |
-+-----------------------+
-           ^
-           | 1:N
-+-----------------------+
-|         USERS         |
-+-----------------------+
-| PK  id                |
-|     name              |
-|     email (UNIQUE)    |
-|     password          |
-|     role              |
-|     remember_token    |
-|     created_at        |
-|     updated_at        |
-+-----------------------+
-           |
-           | 1:N
-           v
-+-----------------------+      1:N                    +------------------+
-|         SALES         |----------------------------<|    SALE_ITEMS    |
-+-----------------------+                             +------------------+
-| PK  id                |                             | PK id            |
-| FK  user_id           |                             | FK sale_id       |
-|     sale_number       |                             | FK product_id    |----+----> [ PRODUCTS.id ]
-|     total             |                             |    quantity      |
-|     status            |                             |    unit_price    |
-|     sold_at           |                             |    subtotal      |
-|     created_at        |                             |    created_at    |
-|     updated_at        |                             |    updated_at    |
-+-----------------------+                             +------------------+
-```
+![Entity Relationship Diagram (ERD)](screenshoot/erd.png)
 
 #### Struktur & Skema Entitas Relasional
 
@@ -184,7 +118,7 @@ Aplikasi menggunakan basis data relasional MySQL dengan integritas relasi yang k
 
 ---
 
-## 📁 Struktur Direktori Proyek
+## Struktur Direktori Proyek
 
 ```plaintext
 uts-inventory/
@@ -220,7 +154,7 @@ uts-inventory/
 
 ---
 
-## 💻 Persyaratan Sistem
+## Persyaratan Sistem
 
 Pastikan *environment* lokal Anda memenuhi kualifikasi berikut:
 - **PHP**: `^8.0` atau `^8.1` (dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`)
@@ -230,7 +164,7 @@ Pastikan *environment* lokal Anda memenuhi kualifikasi berikut:
 
 ---
 
-## 🚀 Panduan Instalasi & Menjalankan
+## Panduan Instalasi & Menjalankan
 
 Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer lokal:
 
@@ -281,11 +215,11 @@ php artisan storage:link
 php artisan serve
 ```
 Buka browser dan akses aplikasi melalui tautan:
-👉 **[http://localhost:8000](http://localhost:8000)**
+**[http://localhost:8000](http://localhost:8000)**
 
 ---
 
-## 🔑 Akun Demo Pengujian
+## Akun Demo Pengujian
 
 Setelah menjalankan `php artisan migrate --seed`, akun demo berikut otomatis tersedia untuk pengujian:
 
@@ -307,6 +241,6 @@ Setelah menjalankan `php artisan migrate --seed`, akun demo berikut otomatis ter
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 Proyek ini dibuat untuk keperluan akademik dan didistribusikan di bawah lisensi [MIT](LICENSE). Silakan gunakan dan sesuaikan sesuai kebutuhan pengembangan.
