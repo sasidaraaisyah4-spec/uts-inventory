@@ -79,96 +79,86 @@ Aplikasi menggunakan basis data relasional MySQL dengan integritas relasi yang k
 
 ### 1. Entity Relationship Diagram (ERD)
 
-```mermaid
-erDiagram
-    users ||--o{ sales : "places / processes"
-    users ||--o{ purchases : "creates"
-    suppliers ||--o{ purchases : "supplies"
-    categories ||--o{ products : "classifies"
-    purchases ||--|{ purchase_items : "contains"
-    products ||--o{ purchase_items : "ordered_in"
-    sales ||--|{ sale_items : "contains"
-    products ||--o{ sale_items : "sold_in"
-
-    users {
-        bigint id PK
-        string name
-        string email UK
-        string password
-        string role "admin | staff | customer"
-        timestamp email_verified_at
-        string remember_token
-        timestamps created_at_updated_at
-    }
-
-    categories {
-        bigint id PK
-        string name UK
-        timestamps created_at_updated_at
-    }
-
-    suppliers {
-        bigint id PK
-        string name
-        string phone
-        string email
-        timestamps created_at_updated_at
-    }
-
-    products {
-        bigint id PK
-        bigint category_id FK
-        string sku UK
-        string name
-        string image
-        decimal purchase_price "15,2"
-        decimal selling_price "15,2"
-        int stock
-        int minimum_stock
-        timestamps created_at_updated_at
-    }
-
-    purchases {
-        bigint id PK
-        bigint supplier_id FK
-        bigint user_id FK
-        string purchase_number UK
-        decimal total "15,2"
-        string status
-        timestamp purchased_at
-        timestamps created_at_updated_at
-    }
-
-    purchase_items {
-        bigint id PK
-        bigint purchase_id FK
-        bigint product_id FK
-        int quantity
-        decimal unit_cost "15,2"
-        decimal subtotal "15,2"
-        timestamps created_at_updated_at
-    }
-
-    sales {
-        bigint id PK
-        bigint user_id FK
-        string sale_number UK
-        decimal total "15,2"
-        string status
-        timestamp sold_at
-        timestamps created_at_updated_at
-    }
-
-    sale_items {
-        bigint id PK
-        bigint sale_id FK
-        bigint product_id FK
-        int quantity
-        decimal unit_price "15,2"
-        decimal subtotal "15,2"
-        timestamps created_at_updated_at
-    }
+```text
++-----------------------+              1:N             +-----------------------+
+|      CATEGORIES       |-----------------------------<|       PRODUCTS        |
++-----------------------+                              +-----------------------+
+| PK  id                |                              | PK  id                |
+|     name (UNIQUE)     |                              | FK  category_id       |
+|     created_at        |                              |     sku (UNIQUE)      |
+|     updated_at        |                              |     name              |
++-----------------------+                              |     image             |
+                                                       |     purchase_price    |
+                                                       |     selling_price     |
++-----------------------+                              |     stock             |
+|       SUPPLIERS       |                              |     minimum_stock     |
++-----------------------+                              |     created_at        |
+| PK  id                |                              |     updated_at        |
+|     name              |                              +-----------------------+
+|     phone             |                                       |           ^
+|     email             |                                   1:N |           | 1:N
+|     created_at        |                                       v           |
+|     updated_at        |                             +------------------+  |
++-----------------------+                             |  PURCHASE_ITEMS  |  |
+           |                                          +------------------+  |
+           | 1:N                                      | PK id            |  |
+           v                                          | FK purchase_id   |  |
++-----------------------+      1:N                    | FK product_id    |--+
+|       PURCHASES       |----------------------------<|    quantity      |
++-----------------------+                             |    unit_cost     |
+| PK  id                |                             |    subtotal      |
+| FK  supplier_id       |                             |    created_at    |
+| FK  user_id           |                             |    updated_at    |
+|     purchase_number   |                             +------------------+
+|     total             |
+|     status            |
+|     purchased_at      |
+|     created_at        |
+|     updated_at        |
++-----------------------+
+           ^
+           | 1:N
++-----------------------+
+|         USERS         |
++-----------------------+
+| PK  id                |
+|     name              |
+|     email (UNIQUE)    |
+|     password          |
+|     role              |
+|     remember_token    |
+|     created_at        |
+|     updated_at        |
++-----------------------+
+           |
+           | 1:N
+           v
++-----------------------+      1:N                    +------------------+
+|         SALES         |----------------------------<|    SALE_ITEMS    |
++-----------------------+                             +------------------+
+| PK  id                |                             | PK id            |
+| FK  user_id           |                             | FK sale_id       |
+|     sale_number       |                             | FK product_id    |----+----> [ PRODUCTS.id ]
+|     total             |                             |    quantity      |
+|     status            |                             |    unit_price    |
+|     sold_at           |                             |    subtotal      |
+|     created_at        |                             |    created_at    |
+|     updated_at        |                             |    updated_at    |
++-----------------------+                             +------------------+
 ```
+
+#### Struktur & Skema Entitas Relasional
+
+| Nama Entitas | Kolom Kunci & Tipe | Relasi (Foreign Key) | Keterangan |
+| :--- | :--- | :--- | :--- |
+| **`users`** | `id` (PK, BigInt), `email` (UK) | - | Menyimpan akun pengguna (Admin, Staff, Customer). |
+| **`categories`** | `id` (PK, BigInt), `name` (UK) | - | Klasifikasi kategori katalog mainan/koleksi seni. |
+| **`suppliers`** | `id` (PK, BigInt) | - | Rekanan pemasok/vendor untuk restock inventaris. |
+| **`products`** | `id` (PK, BigInt), `sku` (UK) | `category_id` ➔ `categories(id)` | Katalog master item, harga beli/jual, dan batas stok fisik. |
+| **`purchases`** | `id` (PK, BigInt), `purchase_number` (UK) | `supplier_id` ➔ `suppliers(id)`<br>`user_id` ➔ `users(id)` | Faktur transaksi masuk (restock dari pemasok). |
+| **`purchase_items`** | `id` (PK, BigInt) | `purchase_id` ➔ `purchases(id)`<br>`product_id` ➔ `products(id)` | Rincian kuantitas & harga modal item pengadaan masuk. |
+| **`sales`** | `id` (PK, BigInt), `sale_number` (UK) | `user_id` ➔ `users(id)` | Faktur transaksi keluar (kasir POS atau customer checkout). |
+| **`sale_items`** | `id` (PK, BigInt) | `sale_id` ➔ `sales(id)`<br>`product_id` ➔ `products(id)` | Rincian kuantitas & harga jual item transaksi keluar. |
 
 ### 2. Penjelasan Relasi Antar Entitas
 
