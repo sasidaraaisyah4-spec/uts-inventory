@@ -1,0 +1,134 @@
+# Entity Relationship Diagram (ERD) - UTS Inventory Laravel
+
+Dokumen ini berisi pemodelan basis data (ERD), relasi antartabel, dan kamus data yang diekstraksi langsung dari migrasi dan model project `UTS_Inventory_Laravel`.
+
+---
+
+## 1. Diagram ERD (Mermaid)
+
+```mermaid
+erDiagram
+    USERS ||--o{ PURCHASES : "mencatat / memproses"
+    USERS ||--o{ SALES : "melakukan pembelian"
+    CATEGORIES ||--o{ PRODUCTS : "mengelompokkan"
+    SUPPLIERS ||--o{ PURCHASES : "memasok barang"
+    PURCHASES ||--|{ PURCHASE_ITEMS : "terdiri atas"
+    PRODUCTS ||--o{ PURCHASE_ITEMS : "dicatat pada"
+    SALES ||--|{ SALE_ITEMS : "terdiri atas"
+    PRODUCTS ||--o{ SALE_ITEMS : "dipesan dalam"
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        timestamp email_verified_at
+        string password
+        string role "admin | staff | customer"
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CATEGORIES {
+        bigint id PK
+        string name UK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SUPPLIERS {
+        bigint id PK
+        string name
+        string phone
+        string email
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PRODUCTS {
+        bigint id PK
+        bigint category_id FK
+        string sku UK
+        string name
+        string image
+        decimal purchase_price
+        decimal selling_price
+        int stock
+        int minimum_stock
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PURCHASES {
+        bigint id PK
+        bigint supplier_id FK
+        bigint user_id FK
+        string purchase_number UK
+        decimal total
+        string status
+        timestamp purchased_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PURCHASE_ITEMS {
+        bigint id PK
+        bigint purchase_id FK
+        bigint product_id FK
+        int quantity
+        decimal unit_cost
+        decimal subtotal
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SALES {
+        bigint id PK
+        bigint user_id FK
+        string sale_number UK
+        decimal total
+        string status
+        timestamp sold_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SALE_ITEMS {
+        bigint id PK
+        bigint sale_id FK
+        bigint product_id FK
+        int quantity
+        decimal unit_price
+        decimal subtotal
+        timestamp created_at
+        timestamp updated_at
+    }
+```
+
+---
+
+## 2. Hubungan Antar Entitas (Cardinality & Foreign Keys)
+
+| Entitas Asal | Hubungan | Entitas Tujuan | Foreign Key | Penjelasan Relasi |
+| :--- | :---: | :--- | :--- | :--- |
+| **`categories`** | `1 : N` | **`products`** | `products.category_id` | Satu kategori menaungi banyak produk (`restrictOnDelete`). |
+| **`suppliers`** | `1 : N` | **`purchases`** | `purchases.supplier_id` | Satu supplier dapat memasok banyak transaksi pembelian/restock (`restrictOnDelete`). |
+| **`users`** | `1 : N` | **`purchases`** | `purchases.user_id` | Satu user (admin/staff) mencatat banyak transaksi restock (`restrictOnDelete`). |
+| **`purchases`** | `1 : N` | **`purchase_items`** | `purchase_items.purchase_id` | Satu transaksi restock memiliki banyak item rincian (`cascadeOnDelete`). |
+| **`products`** | `1 : N` | **`purchase_items`** | `purchase_items.product_id` | Satu produk dapat muncul di berbagai rincian restock (`restrictOnDelete`). |
+| **`users`** | `1 : N` | **`sales`** | `sales.user_id` | Satu user (pelanggan/customer) dapat melakukan banyak transaksi pesanan (`restrictOnDelete`). |
+| **`sales`** | `1 : N` | **`sale_items`** | `sale_items.sale_id` | Satu nota transaksi penjualan terdiri dari rincian barang belanjaan (`cascadeOnDelete`). |
+| **`products`** | `1 : N` | **`sale_items`** | `sale_items.product_id` | Satu produk dapat dibeli dalam banyak transaksi penjualan (`restrictOnDelete`). |
+
+---
+
+## 3. Kamus Data (Data Dictionary) Singkat
+
+1. **`users`**: Akun pengguna sistem dengan multi-role (`admin`, `staff`, `customer`).
+2. **`categories`**: Data master kelompok produk barang (contoh: Blind Box, Action Figure, Plushie, dll.).
+3. **`suppliers`**: Data master kontak pemasok barang ke toko.
+4. **`products`**: Data inventori produk yang mencakup SKU, harga beli (`purchase_price`), harga jual (`selling_price`), jumlah stok fisik, dan batas minimum stok peringatan.
+5. **`purchases`**: Header transaksi pengadaan/restock produk dari pihak supplier.
+6. **`purchase_items`**: Detail item produk yang dibeli saat restock beserta kuantitas dan harga belinya.
+7. **`sales`**: Header nota transaksi pembelian produk oleh customer.
+8. **`sale_items`**: Detail item produk yang dibeli customer pada nomor nota transaksi tersebut.
