@@ -94,8 +94,9 @@ Aplikasi menggunakan basis data relasional MySQL dengan integritas relasi yang k
 | **`sales`** | `id` (PK, BigInt), `sale_number` (UK) | `user_id` ➔ `users(id)` | Faktur transaksi keluar (kasir POS atau customer checkout). |
 | **`sale_items`** | `id` (PK, BigInt) | `sale_id` ➔ `sales(id)`<br>`product_id` ➔ `products(id)` | Rincian kuantitas & harga jual item transaksi keluar. |
 
-### 2. Penjelasan Relasi Antar Entitas
+### 2. Penjelasan Relasi Kardinalitas (1 : N & M : N)
 
+#### A. Relasi 1 : N (One to Many)
 | Hubungan Relasi | Kardinalitas | Aturan Hapus (On Delete) | Deskripsi Fungsional |
 | :--- | :---: | :---: | :--- |
 | **`categories` ➔ `products`** | 1 : N | `RESTRICT` | Setiap produk harus memiliki satu kategori. Kategori tidak dapat dihapus jika masih menampung produk. |
@@ -106,6 +107,12 @@ Aplikasi menggunakan basis data relasional MySQL dengan integritas relasi yang k
 | **`users` ➔ `sales`** | 1 : N | `RESTRICT` | Mencatat kasir yang bertugas (untuk transaksi POS) atau customer pemesan (untuk self-checkout). |
 | **`sales` ➔ `sale_items`** | 1 : N | `CASCADE` | Satu nota penjualan menampung rincian barang yang dibeli beserta subtotalnya. |
 | **`products` ➔ `sale_items`** | 1 : N | `RESTRICT` | Menghubungkan produk ke bukti pembelian riil, menjamin audit trail histori harga jual tidak hilang. |
+
+#### B. Relasi M : N (Many to Many - Melalui Entitas Asosiatif / Pivot)
+| Hubungan Relasi | Kardinalitas Konseptual | Entitas Penjembatan (Pivot) | Keterangan Fungsional |
+| :--- | :---: | :--- | :--- |
+| **`purchases` ⟷ `products`** | **M : N** | **`purchase_items`** | Satu transaksi restock bisa mencakup banyak produk, dan satu produk dapat dibeli berulang kali di berbagai faktur pembelian dari supplier. Rincian kuantitas & harga modal dicatat di `purchase_items`. |
+| **`sales` ⟷ `products`** | **M : N** | **`sale_items`** | Satu transaksi nota penjualan bisa membeli banyak jenis produk, dan satu produk dapat dibeli oleh banyak transaksi/customer yang berbeda. Rincian kuantitas & harga jual dicatat di `sale_items`. |
 
 ### 3. Kamus Data Singkat
 
