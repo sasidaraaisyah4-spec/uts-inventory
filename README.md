@@ -79,7 +79,7 @@ Aplikasi menggunakan basis data relasional MySQL dengan integritas relasi yang k
 
 ### 1. Entity Relationship Diagram (ERD)
 
-![Entity Relationship Diagram (ERD)](screenshoot/erd.png)
+![Entity Relationship Diagram (ERD)](screenshoot/erd.uts.drawio.png)
 
 #### Struktur & Skema Entitas Relasional
 

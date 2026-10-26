@@ -1,0 +1,96 @@
+erDiagram
+    CATEGORIES ||--o{ PRODUCTS : "1 to N"
+    SUPPLIERS ||--o{ PURCHASES : "1 to N"
+    USERS ||--o{ PURCHASES : "1 to N"
+    USERS ||--o{ SALES : "1 to N"
+    PURCHASES ||--|{ PURCHASE_ITEMS : "1 to N"
+    PRODUCTS ||--o{ PURCHASE_ITEMS : "1 to N (M:N ke Purchases)"
+    SALES ||--|{ SALE_ITEMS : "1 to N"
+    PRODUCTS ||--o{ SALE_ITEMS : "1 to N (M:N ke Sales)"
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        timestamp email_verified_at
+        string password
+        string role "admin/staff/customer"
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CATEGORIES {
+        bigint id PK
+        string name UK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SUPPLIERS {
+        bigint id PK
+        string name
+        string phone
+        string email
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PRODUCTS {
+        bigint id PK
+        bigint category_id FK
+        string sku UK
+        string name
+        string image
+        decimal purchase_price
+        decimal selling_price
+        int stock
+        int minimum_stock
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PURCHASES {
+        bigint id PK
+        bigint supplier_id FK
+        bigint user_id FK
+        string purchase_number UK
+        decimal total
+        string status
+        timestamp purchased_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PURCHASE_ITEMS {
+        bigint id PK
+        bigint purchase_id FK
+        bigint product_id FK
+        int quantity
+        decimal unit_cost
+        decimal subtotal
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SALES {
+        bigint id PK
+        bigint user_id FK
+        string sale_number UK
+        decimal total
+        string status
+        timestamp sold_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SALE_ITEMS {
+        bigint id PK
+        bigint sale_id FK
+        bigint product_id FK
+        int quantity
+        decimal unit_price
+        decimal subtotal
+        timestamp created_at
+        timestamp updated_at
+    }

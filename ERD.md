@@ -6,7 +6,7 @@ Dokumen ini berisi pemodelan basis data (ERD), relasi antartabel, dan kamus data
 
 ## 1. Diagram ERD
 
-![Entity Relationship Diagram (ERD)](screenshoot/erd.png)
+![Entity Relationship Diagram (ERD)](screenshoot/erd.uts.drawio.png)
 
 ---
 
